@@ -1,48 +1,70 @@
 import sys
 from os import listdir, environ
 from os.path import isfile, join
+from subprocess import run
 
 # for p in environ['PATH'].split(':'): print(p)
+        
+def exit(args):
+    sys.exit(int(args[1]))
+
 
 def not_found(command):
     print('{command}: not found'.format(command=command))
 
+
 def echo(args):
     print(' '.join(args[1:]))
+
 
 def check_builtins(args):
     command = args[1]
 
     if command in commands:
         return True    
+    
+
+def run_command(args):
+    run(args)
         
+
+def find_in_env_paths(command):
+    path = environ['PATH']
+
+    directories = path.split(':')
+    for directory in directories:
+        try:
+            if is_command_in_dir(directory, command):
+                return directory
+        except:
+            continue
+
+    return None
+
+
+def is_command_in_dir(directory, command):
+    dir_list = listdir(directory)
+    files_in_directory = [f for f in dir_list if isfile(join(directory, f))]
+    # print(files_in_directory)
+    if command in files_in_directory:
+        return True
+
 
 def report_type(args):
     command = args[1]
-
-    path = environ['PATH']
 
     if check_builtins(args):
         print('{command} is a shell builtin'.format(command=command))
         return
     else:
-        directories = path.split(':')
-        # print(directories)
-        for directory in directories:
-            try:
-                dir_list = listdir(directory)
-                files_in_directory = [f for f in dir_list if isfile(join(directory, f))]
-                # print(files_in_directory)
-                if command in files_in_directory:
-                    print('{command} is {directory}/{command}'.format(command=command, directory=directory))
-                    return
-            except:
-                    continue
+        directory = find_in_env_paths(command)
+        if directory:
+            print('{command} is {directory}/{command}'.format(command=command, directory=directory))
+            return
+
             
     not_found(command)
-        
-def exit(args):
-    sys.exit(int(args[1]))
+
 
 commands = {
    'echo': echo,
@@ -60,6 +82,8 @@ def main():
 
         if command in commands:
             commands[command](args)
+        elif find_in_env_paths(command):
+            run(args)
         else:
             not_found(command)
 
