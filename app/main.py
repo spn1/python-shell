@@ -4,12 +4,12 @@ import sys
 def main():
     while True:
         sys.stdout.write("$ ")
-        command = input()
+        command = input().split()
 
-        if command == 'exit':
-            break
+        if command[0] == 'exit':
+            return command[1]
 
-        print('{command}: command not found'.format(command=command))
+        print('{command}: command not found'.format(command=command[0]))
 
 
 if __name__ == "__main__":
