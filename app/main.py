@@ -1,6 +1,6 @@
 import sys
-from os import listdir, environ
-from os.path import isfile, join
+from os import listdir, environ, chdir
+from os.path import isfile, isdir, join
 from subprocess import run
 from pathlib import Path
 
@@ -70,11 +70,24 @@ def report_type(args):
 def pwd(args):
     print(Path('.').absolute())
 
+
+def change_directory(args):
+    path = args[1]
+    try:
+        if isdir(path):
+            chdir(path)
+        else:
+            print('cd: {path}: No such file or directory'.format(path=path))
+    except:
+        print('error')
+
+
 commands = {
    'echo': echo,
    'exit': exit,
    'type': report_type,
-   'pwd': pwd
+   'pwd': pwd,
+   'cd': change_directory
 }
 
 
