@@ -2,6 +2,7 @@ import sys
 from os import listdir, environ
 from os.path import isfile, join
 from subprocess import run
+from pathlib import Path
 
 # for p in environ['PATH'].split(':'): print(p)
         
@@ -66,10 +67,14 @@ def report_type(args):
     not_found(command)
 
 
+def pwd(args):
+    print(Path('.').absolute())
+
 commands = {
    'echo': echo,
    'exit': exit,
-   'type': report_type
+   'type': report_type,
+   'pwd': pwd
 }
 
 
