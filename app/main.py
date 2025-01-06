@@ -73,6 +73,9 @@ def pwd(args):
 
 def change_directory(args):
     path = args[1]
+    if '~' in path:
+        path = path.replace('~', environ['HOME'])
+
     try:
         if isdir(path):
             chdir(path)
