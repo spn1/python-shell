@@ -124,11 +124,14 @@ def parse_args(user_input):
     args = []
     current_arg = []
     is_inside_quotes = False
+    is_inside_double_qoutes = False
 
     for char in user_input:
-        if char == '\'':
+        if char == '\'' and not is_inside_double_qoutes:
             is_inside_quotes = not is_inside_quotes
-        elif char == ' ' and not is_inside_quotes:
+        elif char == '\"':
+            is_inside_double_qoutes = not is_inside_double_qoutes
+        elif char == ' ' and not is_inside_quotes and not is_inside_double_qoutes:
             if current_arg:
                 args.append(''.join(current_arg))
                 current_arg = []
