@@ -94,11 +94,62 @@ commands = {
 }
 
 
+def flatten(lists):
+    return [arg for inner_list in lists for arg in inner_list]
+
+
+def remove_empty_strings(args): 
+    return [arg for arg in args if len(arg) != 0]
+
+
+# Hack use for double quote, don't like it, see parse_args
+def get_args(user_input):
+    #                         # Hack for double quote
+    quotes_split = user_input.replace('\'\'', '').split('\'')
+
+    if len(quotes_split) == 1:
+        return user_input.strip().split()
+
+    # non-quoted args will have spaces at the start or end - only split these
+    args_stripped = [
+        arg.strip().split()
+        if len(arg) > 0 and (arg[0] == ' ' or arg[-1] == ' ') else [arg]
+        for arg in quotes_split
+    ]
+
+    return remove_empty_strings(flatten(args_stripped))
+
+
+def parse_args(user_input):
+    args = []
+    current_arg = []
+    is_inside_quotes = False
+
+    for char in user_input:
+        if char == '\'':
+            is_inside_quotes = not is_inside_quotes
+        elif char == ' ' and not is_inside_quotes:
+            if current_arg:
+                args.append(''.join(current_arg))
+                current_arg = []
+        else:
+            current_arg.append(char)
+
+    if current_arg:
+        args.append(''.join(current_arg))
+        current_arg = []
+
+    return args
+        
+        
+
 def main():
     while True:
         sys.stdout.write("$ ")
-        args = input().split(' ')
-        # print(args)
+        user_input = input()
+
+        args = parse_args(user_input)
+
         command = args[0]
 
         if command in commands:
@@ -107,7 +158,6 @@ def main():
             run(args)
         else:
             not_found(command)
-
 
 
 if __name__ == "__main__":
