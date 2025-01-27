@@ -125,26 +125,34 @@ def parse_args(user_input):
     current_arg = []
     is_inside_quotes = False
     is_inside_double_qoutes = False
+    is_proceeding_backslash = False
 
     for char in user_input:
-        if char == '\'' and not is_inside_double_qoutes:
-            is_inside_quotes = not is_inside_quotes
-        elif char == '\"':
-            is_inside_double_qoutes = not is_inside_double_qoutes
-        elif char == ' ' and not is_inside_quotes and not is_inside_double_qoutes:
-            if current_arg:
-                args.append(''.join(current_arg))
-                current_arg = []
+        if not is_proceeding_backslash and char == '\\' and not is_inside_quotes and not is_inside_double_qoutes:
+            is_proceeding_backslash = True
+            continue
+
+        if not is_proceeding_backslash:
+            if char == '\'' and not is_inside_double_qoutes:
+                is_inside_quotes = not is_inside_quotes
+            elif char == '\"':
+                is_inside_double_qoutes = not is_inside_double_qoutes
+            elif char == ' ' and not is_inside_quotes and not is_inside_double_qoutes:
+                if current_arg:
+                    args.append(''.join(current_arg))
+                    current_arg = []
+            else:
+                current_arg.append(char)
         else:
             current_arg.append(char)
+            is_proceeding_backslash = False
 
     if current_arg:
         args.append(''.join(current_arg))
         current_arg = []
 
     return args
-        
-        
+
 
 def main():
     while True:
