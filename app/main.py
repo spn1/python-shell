@@ -122,8 +122,22 @@ def get_args(user_input):
     return remove_empty_strings(flatten(args_stripped))
 
 
-def parse_arg_character(char, is_proceeding_backslash, is_inside_quotes, is_inside_double_quotes):
+def is_argument_terminating_character(char, is_inside_quotes, is_inside_double_quotes):
+    return char == ' ' and not is_inside_quotes and not is_inside_double_quotes
+
+
+def is_backslash_special(char, is_inside_quotes, is_proceeding_backslash):
+    return char == '\\' and not is_inside_quotes and not is_proceeding_backslash
+
+
+def parse_argument_character(char, current_arg, is_inside_quotes, is_inside_double_quotes):
     pass
+
+def parse_special_character(char, is_inside_double_quotes):
+    if is_inside_double_quotes and not any(c in char for c in double_quote_allowed_backslash_characters):
+        return '\\{char}'.format(char=char)
+    else:
+        return char
 
 
 def parse_args(user_input):
@@ -134,13 +148,7 @@ def parse_args(user_input):
     is_proceeding_backslash = False
 
     for char in user_input:
-        # file = "/tmp/quz/'f 38'"
-        # error = "cat: /tmp/quz/f 38: No such file or directory"
-        # char = \
-        # is_inside_quotes = False
-        # is_inside_double_quotes = True
-        # is_proceeding_backslash = False
-        if not is_inside_quotes and not is_proceeding_backslash and char == '\\':
+        if is_backslash_special(char, is_inside_quotes, is_proceeding_backslash):
             is_proceeding_backslash = True
             continue
 
@@ -152,18 +160,14 @@ def parse_args(user_input):
                     is_inside_quotes = not is_inside_quotes
             elif char == '\"' and not is_inside_quotes:
                 is_inside_double_quotes = not is_inside_double_quotes
-            elif char == ' ' and not is_inside_quotes and not is_inside_double_quotes:
+            elif is_argument_terminating_character(char, is_inside_quotes, is_inside_double_quotes):
                 if current_arg:
                     args.append(''.join(current_arg))
                     current_arg = []
             else:
                 current_arg.append(char)
         else:
-            if is_inside_double_quotes and not any(c in char for c in double_quote_allowed_backslash_characters):
-                current_arg.append('\\')
-                current_arg.append(char)
-            else:
-                current_arg.append(char)
+            current_arg.append(parse_special_character(char, is_inside_double_quotes))
 
             is_proceeding_backslash = False
 
